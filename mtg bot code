@@ -1,0 +1,158 @@
+import discord
+import pandas as pd
+import os
+import requests
+from discord.ext import commands
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+TOKEN = os.getenv('DISCORD_BOT_TOKEN')  # Ensure the token is securely stored in .env
+
+# Set up bot
+intents = discord.Intents.default()
+intents.messages = True
+intents.members = True  # Allows access to guild members
+bot = commands.Bot(command_prefix="!", intents=discord.Intents.all())
+
+# Directory containing CSV files
+CSV_DIRECTORY = r"C:\Users\Bo\OneDrive\Desktop\mtg_cvs"
+RULES_FILE_PATH = os.path.join(CSV_DIRECTORY, 'mtg_rules.txt.txt')
+
+# Server ID for guild-related operations
+GUILD_ID = 1147000524466573452
+
+@bot.event
+async def on_ready():
+    print(f'✅ Logged in as {bot.user.name}')
+
+# ============================ CARD LOOKUP COMMAND ============================ #
+@bot.command(name='card')
+async def card_lookup(ctx, *, card_name: str):
+    """Fetch MTG card details from Scryfall API and display in an embed."""
+    url = f"https://api.scryfall.com/cards/named?fuzzy={card_name}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+    except requests.exceptions.RequestException:
+        await ctx.send("🚫 Could not retrieve card data. Check your spelling and try again.")
+        return
+
+    # Extract relevant details
+    name = data.get("name", "Unknown Card")
+    set_name = data.get("set_name", "Unknown Set")
+    image_url = data.get("image_uris", {}).get("normal", None)
+    oracle_text = data.get("oracle_text", "No rules text available.")
+    mana_cost = data.get("mana_cost", "N/A")
+    type_line = data.get("type_line", "Unknown Type")
+    power = data.get("power", "N/A") if "power" in data else ""
+    toughness = data.get("toughness", "N/A") if "toughness" in data else ""
+    loyalty = data.get("loyalty", "N/A") if "loyalty" in data else ""
+    price_usd = data.get("prices", {}).get("usd", "N/A")
+    price_foil = data.get("prices", {}).get("usd_foil", "N/A")
+    price_tix = data.get("prices", {}).get("tix", "N/A")
+    scryfall_url = data.get("scryfall_uri", "")
+
+    # Extract legality
+    legalities = data.get("legalities", {})
+    legal_formats = [fmt.upper() for fmt, status in legalities.items() if status == "legal"]
+    legality_text = ", ".join(legal_formats) if legal_formats else "None"
+
+    # Fetch related prints
+    related_prints = []
+    related_url = f"https://api.scryfall.com/cards/search?q=oracleid:{data.get('oracle_id')}"
+    related_response = requests.get(related_url)
+    
+    if related_response.status_code == 200:
+        related_data = related_response.json()
+        related_prints = [f"[{card.get('set_name')}]({card.get('scryfall_uri')})" for card in related_data.get("data", [])]
+
+    related_text = ", ".join(related_prints[:5]) if related_prints else "No other prints found."
+
+    # Construct the embed message
+    embed = discord.Embed(title=name, description=f"{type_line} | {set_name}", color=0x1F8B4C)
+    if image_url:
+        embed.set_thumbnail(url=image_url)
+    embed.add_field(name="Mana Cost", value=mana_cost, inline=True)
+
+    # Power/Toughness or Loyalty
+    if power and toughness:
+        embed.add_field(name="Power/Toughness", value=f"{power}/{toughness}", inline=True)
+    elif loyalty != "N/A":
+        embed.add_field(name="Loyalty", value=loyalty, inline=True)
+
+    embed.add_field(name="Oracle Text", value=oracle_text[:1024], inline=False)
+    embed.add_field(name="Price (USD)", value=f"${price_usd}" if price_usd != "N/A" else "N/A", inline=True)
+    embed.add_field(name="Foil Price (USD)", value=f"${price_foil}" if price_foil != "N/A" else "N/A", inline=True)
+    embed.add_field(name="MTGO Price (TIX)", value=price_tix, inline=True)
+    embed.add_field(name="Legality", value=legality_text, inline=False)
+    embed.add_field(name="Related Prints", value=related_text, inline=False)
+    embed.add_field(name="More Info", value=f"[Scryfall Link]({scryfall_url})", inline=False)
+
+    await ctx.send(embed=embed)
+
+# ============================ SEARCH CSV COMMAND ============================ #
+@bot.command(name='whohas')
+async def search_csv(ctx, *, search_terms: str):
+    """Search user CSV files for specific card names."""
+    guild = bot.get_guild(GUILD_ID) if isinstance(ctx.channel, discord.DMChannel) else ctx.guild
+
+    terms = [term.strip().lower() for term in search_terms.split(',')]
+    results = {}
+
+    for filename in os.listdir(CSV_DIRECTORY):
+        if filename.endswith('.csv'):
+            user_id = os.path.splitext(filename)[0]  # Extract user ID
+            file_path = os.path.join(CSV_DIRECTORY, filename)
+
+            try:
+                df = pd.read_csv(file_path, usecols=["Card Name"])  # Load only necessary column
+                for term in terms:
+                    if df["Card Name"].str.lower().eq(term).any():
+                        results.setdefault(user_id, []).append(term)
+            except Exception as e:
+                print(f"⚠️ Error reading {filename}: {e}")
+
+    if results:
+        response = '🃏 **Cards Found:**\n' + "\n".join(f'<@{user_id}> has: {", ".join(terms)}' for user_id, terms in results.items())
+    else:
+        response = '❌ None of the search terms were found in any user\'s CSV files.'
+
+    await ctx.send(response)
+
+# ============================ SEARCH RULES COMMAND ============================ #
+@bot.command(name='rule')
+async def search_rule(ctx, *, search_terms: str):
+    """Search for specific MTG rules based on keywords."""
+    RULES_CHANNEL_NAME = '🧐card-ruling'
+    
+    if ctx.channel.name != RULES_CHANNEL_NAME:
+        await ctx.send(f'🚫 This command can only be used in #{RULES_CHANNEL_NAME}.')
+        return
+
+    if not os.path.exists(RULES_FILE_PATH):
+        await ctx.send('⚠️ Rules file not found.')
+        return
+
+    with open(RULES_FILE_PATH, 'r', encoding='utf-8') as f:
+        rules = f.readlines()
+
+    search_terms = search_terms.lower().split()
+    matching_rules = [line for line in rules if all(term in line.lower() for term in search_terms)]
+
+    if matching_rules:
+        response = '📜 **Found Rules:**\n' + ''.join(matching_rules[:7])
+        if len(matching_rules) > 7:
+            response += f"\n...and {len(matching_rules) - 7} more. Please refine your search."
+    else:
+        response = '❌ No rules found matching those terms.'
+
+    await ctx.send(response)
+
+# ============================ RUN THE BOT ============================ #
+if TOKEN:
+    bot.run(TOKEN)
+else:
+    print("🚨 Error: DISCORD_BOT_TOKEN not found in .env file!")
