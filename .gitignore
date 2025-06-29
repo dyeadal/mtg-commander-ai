@@ -1,0 +1,16 @@
+# Ignore everything in home directory
+$HOME/*
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore editor/IDE config
+.vscode/
+*.swp
+
+# Ignore OS/user stuff
+*.key
+*.pem
+*.crt
+*.env
