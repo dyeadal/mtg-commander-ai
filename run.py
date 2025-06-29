@@ -1,1 +1,1 @@
-
+logginglib.PrintAndLog("Test")
