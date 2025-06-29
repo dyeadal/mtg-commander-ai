@@ -55,3 +55,16 @@ pip3 install -r requirements.txt
 # Run project locally
 python3 run.py
 ```
+
+---
+
+## 🏃 Getting Started 
+
+If you're new to the project and want to help:
+
+1) Check out our open issues. Look for issues labeled issue, task, help wanted, or documentation.
+[MTG Commander AI Issues board](https://github.com/dyeadal/mtg-commander-ai/issues).
+
+2) Comment on the issue you'd like to work on. Wait for confirmation or assignment from a maintainer before starting.
+
+3) If no issues are a good fit, feel free to ask for suggestions or contribute ideas to new features, we’re happy to help point you to something!
