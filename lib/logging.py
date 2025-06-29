@@ -2,6 +2,13 @@ import datetime
 import os
 import time
 
+from exceptiongroup import catch
+
+import config as cfg
+
+LogEnable = cfg.LogEnable()
+LogLocation = cfg.LogLocation
+
 # Function to sleep
 def Wait():
     return
@@ -36,8 +43,8 @@ def EnableLogging():
     global LogEnable
     LogEnable = True
 
-# Create Log File, default to user home directory and name prefix of "SeleniumLib"
-def CreateLogFile(Directory=os.path.expanduser("~"), NamePrefix="SeleniumLib"):
+# Create Log File, default to user home directory and name prefix of "MTGCommanderAILog"
+def CreateLogFile(Directory=os.path.expanduser("~"), NamePrefix="MTGCommanderAILog"):
     # Enable LogLocation to be Global
     global LogLocation
 
