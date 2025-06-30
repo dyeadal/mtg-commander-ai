@@ -2,6 +2,7 @@
 # Stores common functions for logging, and text file creation, etc.
 
 from lib import logging as log
+from lib import mtglib as mtg
 
 def Menu():
     log.PrintAndLog("Displaying menu to user")
@@ -21,7 +22,8 @@ def Menu():
 
     a = 0
     if option == "1":
-        a = 1
+        mtg.PasteDeckInTerminal()
+
         Menu()
     elif option == "2":
         a = 2

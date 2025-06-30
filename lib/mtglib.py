@@ -35,16 +35,22 @@ print(testvar)
 """
 def PullCardFromScryfall(card_name):
 
+    card = ""
+    
     # if card contains power, toughness (likely a creature)
     return # name, cast_cost, card_type, card_description, power, toughness
-
+    
     # if card does not return power, toughness
-    return # name, cast_cost, card_type, card_description
+    return card # name, cast_cost, card_type, card_description
 """
 
 # Function to create card #TODO
 """
 def PopulateListUsingScryfall(archidek_list):
-    for card in Archidekt_List:
+
+    for card in archidekt_list:
         extended_card_list.append(PullCardFromScryfall(card))
+        log.Wait()
+    return extended_card_list
 """
+
