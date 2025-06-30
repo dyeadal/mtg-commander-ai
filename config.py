@@ -7,5 +7,5 @@ LogEnable = False
 LogLocation = None
 
 # LLM to use, you can find other models to use at https://ollama.com/
-Ollama_Model = "deepseek-r2"
+Ollama_Model = "deepseek-r1"
 
