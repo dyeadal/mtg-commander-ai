@@ -32,4 +32,3 @@ def formatAnswer(answer):
     return answer
 
 
-

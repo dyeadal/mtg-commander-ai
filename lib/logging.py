@@ -1,27 +1,29 @@
 import datetime
 import os
 import time
+from time import sleep
 
 from exceptiongroup import catch
 
 import config as cfg
 
-LogEnable = cfg.LogEnable()
+LogEnable = cfg.LogEnable
 LogLocation = cfg.LogLocation
 
 # Function to sleep
-def Wait():
-    return
+def Wait(seconds = 3):
+    sleep(seconds)
+    return None
 
-#
+# Function to return the Current Time
 def CurrentTime():
     PrintAndLog(f"Attempting to capture current time via CurrentTime() function.")
-    #
+    # Try to print out M/D/Y H:M:S
     try:
         raw_time = str(datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S"))
         PrintAndLog(f"Current time: {raw_time}")
         return raw_time
-    #
+    # If error occurs
     except Exception as error:
         ErrorHandler(f"Failed to capture current time via CurrentTime() function\n Error: {error}")
         return None
@@ -134,7 +136,7 @@ def WriteToLog(file, msg):
         Wait(15)
         exit()
 
-# Handles errors that occur on website
+# Handles errors that occurs and prompts if they want to continue
 def ErrorHandler(msg):
 
     # Print and log error

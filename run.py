@@ -1,7 +1,4 @@
-from lib import logging as loglib
-from lib import ollamalib as olib
-from lib import mtglib as mtg
-import config as cfg
+from lib import common
 
-loglib.PrintAndLog("Test")
+common.Menu()
 
