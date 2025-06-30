@@ -32,7 +32,7 @@ testvar = PasteDeckInTerminal()
 print(testvar)
 
 # Function to pull data about a single card name (string) #TODO
-"""
+
 def PullCardFromScryfall(card_name):
 
     # if card contains power, toughness (likely a creature)
@@ -40,7 +40,7 @@ def PullCardFromScryfall(card_name):
 
     # if card does not return power, toughness
     return # name, cast_cost, card_type, card_description
-"""
+
 
 # Function to create card #TODO
 """
