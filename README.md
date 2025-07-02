@@ -7,3 +7,10 @@ Use local AI model to assist in making Magic the Gathering commander deck by usi
 4) Make arguments for why cards are to be cut
 5) Output cards to include in commander deck
 6) User can input them by simply pasting into Archidekt
+
+---
+
+### Contributers
+Thank you to all contributors below for your assistance to this project. Your contributions allowed us to acheive something bigger as team than I ever could individually!
+
+[![](https://github.com/boebourgeois.png?size=50)](https://github.com/boebourgeois)
