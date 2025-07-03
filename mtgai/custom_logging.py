@@ -1,10 +1,6 @@
 import datetime
 import os
 import time
-from time import sleep
-
-from exceptiongroup import catch
-
 import config as cfg
 
 LogEnable = cfg.LogEnable
@@ -12,7 +8,7 @@ LogLocation = cfg.LogLocation
 
 # Function to sleep
 def Wait(seconds = 3):
-    sleep(seconds)
+    time.sleep(seconds)
     return None
 
 # Function to return the Current Time

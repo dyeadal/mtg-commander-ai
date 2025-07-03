@@ -1,5 +1,4 @@
-from lib import common, ollamalib
+from mtgai import common as common
 
-if ollamalib.CalculateMinReqs():
-    common.Menu()
+common.Menu()
 

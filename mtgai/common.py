@@ -1,8 +1,8 @@
 # common.py
 # Stores common functions for logging, and text file creation, etc.
 
-from lib import logging as log
-from lib import mtglib as mtg
+from mtgai import custom_logging as log
+from mtgai import mtg_data as mtg
 
 def Menu():
     log.PrintAndLog("Displaying menu to user")
