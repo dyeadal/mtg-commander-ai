@@ -9,6 +9,8 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+__pycache__/
+*.py[cod]
 
 # Ignore OS/user stuff
 *.key

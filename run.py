@@ -1,4 +1,4 @@
-from lib import mtg_common_lib as common
+from mtgai import common as common
 
 common.Menu()
 

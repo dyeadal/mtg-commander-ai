@@ -1,5 +1,5 @@
 # Functions for Archidekt data, and Scryfall API
-import mtg_logging_lib as log
+import custom_logging as log
 import config as cfg
 import requests
 
@@ -88,8 +88,7 @@ def PopulateListUsingScryfall(card_pile):
 # https://www.w3schools.com/python/python_dictionaries.asp
 
 # Example of GrabArchidekt() function and using its returned dictionaries
-test_card_pile = GrabArchidektData("https://archidekt.com/decks/12028998/sultai_arisen_tarkir_dragonstorm_commander")
-
+test_card_pile = GrabArchidektData("https://archidekt.com/decks/13934805/sultai_arisen_tdm")
 print(test_card_pile)
 
 print(len(test_card_pile))
