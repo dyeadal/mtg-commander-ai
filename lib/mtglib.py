@@ -1,21 +1,60 @@
 # Functions for Archidekt data, and Scryfall API
+from lib import mtglogginglib as log
 import requests
 
-from lib.logging import PrintAndLog
+from lib.mtglogginglib import PrintAndLog
 
 extended_card_list = []
 
-def GrabArchidektData():
+def GrabArchidektData(url = None):
 
-    # Store URL
-    url = input("Copy and paste your Archidekt deck URL here: ")
+    # User did not submit a URL, prompt for one
+    if url is None:
+        # Store URL
+        url = input("Copy and paste your Archidekt deck URL here: ")
 
-    str(url)
-    # Try to establish connection to HTTP page
+    # User supplied URL
+    elif url is not None:
+        url = str(url)
+
+    # Issue prompting or storing URL
+    else:
+        log.ThrowIntentionalError("Error running Archidekt API function ")
+
+    # Splits URL to grab and store the Archidekt deck ID to query their API for JSON formatted data on their deck
+    archidekt_deck_ID = url.split("/")[4]
+
+    # Try requesting API for JSON data and return list of names and quantity of each card
+    log.PrintAndLog(f"Attempting to grab Archidekt data from {url} via their API")
     try:
-        return requests.get(url)
+        # Create API URL using deck ID
+        API_url = f"https://archidekt.com/api/decks/{archidekt_deck_ID}/"
+
+        # Perform GET request and store response
+        deck_data = requests.get(API_url)
+
+        # JSON value cards store list of unique cards, quantity and other information
+        card_quantity_in_deck = len(deck_data.json().get("cards"))
+
+        # Create empty dictionary to insert card name and its quantity
+        card_pile = {}
+
+        # Loop through each card
+        i = 0
+        while i < card_quantity_in_deck:
+            # Grab and store card name
+            name = deck_data.json().get('cards')[i].get('card').get('oracleCard').get('name')
+            # Grab and store card quantity
+            quantity = deck_data.json().get('cards')[i].get('quantity')
+
+            # Insert data into dict with a
+            card_pile[name] = quantity
+            i += 1
+        log.PrintAndLog(f"Successfully grabbed Archidekt deck data")
+        return card_pile
+
     except Exception as Error:
-        PrintAndLog(f"{Error}")
+        log.PrintAndLog(f"Unable to grab deck data via Archidekt's API. Error: {Error}")
 
 
 # Function to pull data about a single card name (string) #TODO
@@ -39,8 +78,24 @@ def PopulateListUsingScryfall(card_pile):
         log.Wait()
     return extended_card_list
 
+#PopulateListUsingScryfall(card_pile)
 
-card_pile = {"Sol Ring": 1 , "Arcane Signet" : 1 , "Llanowar Elves": 1 , "Forest" : 5, "Command Tower" : 1}
-# Example of  future function call card_pile = GrabArchidektData("https://archidekt.com/decks/12028998/sultai_arisen_tarkir_dragonstorm_commander")
+####################################################
+# TEST TEST TEST TEST TEST TEST TEST TEST TEST
+####################################################
 
-PopulateListUsingScryfall(card_pile)
+# It is important to note return variable is a dictionary
+# Visit W3 link below to see examples
+# https://www.w3schools.com/python/python_dictionaries.asp
+
+# Example of GrabArchidekt() function and using its returned dictionaries
+test_card_pile = GrabArchidektData("https://archidekt.com/decks/12028998/sultai_arisen_tarkir_dragonstorm_commander")
+
+print(test_card_pile)
+
+print(len(test_card_pile))
+
+# This will loop through each card which we will use in the Scrfall info retrival function
+# Ensure you implement delays and follow Scryfall API rules
+for card, quantity in test_card_pile.items():
+    print(card, quantity)

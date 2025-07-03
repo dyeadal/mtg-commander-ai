@@ -1,7 +1,7 @@
 # common.py
 # Stores common functions for logging, and text file creation, etc.
 
-from lib import logging as log
+from lib import mtglogginglib as log
 from lib import mtglib as mtg
 
 def Menu():
