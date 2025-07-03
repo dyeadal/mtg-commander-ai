@@ -1,9 +1,7 @@
 # Functions for Archidekt data, and Scryfall API
-from lib import mtglogginglib as log
+import mtg_logging_lib as log
 import config as cfg
 import requests
-
-from lib.mtglogginglib import PrintAndLog
 
 extended_card_list = []
 
