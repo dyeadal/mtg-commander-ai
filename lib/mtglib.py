@@ -1,5 +1,6 @@
 # Functions for Archidekt data, and Scryfall API
 from lib import mtglogginglib as log
+import config as cfg
 import requests
 
 from lib.mtglogginglib import PrintAndLog
@@ -30,11 +31,11 @@ def GrabArchidektData(url = None):
         # Create API URL using deck ID
         API_url = f"https://archidekt.com/api/decks/{archidekt_deck_ID}/"
 
-        # Perform GET request and store response
-        deck_data = requests.get(API_url)
+        # Perform GET request with custom header and store JSON response
+        deck_data = requests.get(API_url, cfg.http_header).json()
 
         # JSON value cards store list of unique cards, quantity and other information
-        card_quantity_in_deck = len(deck_data.json().get("cards"))
+        card_quantity_in_deck = len(deck_data.get("cards"))
 
         # Create empty dictionary to insert card name and its quantity
         card_pile = {}
@@ -43,11 +44,11 @@ def GrabArchidektData(url = None):
         i = 0
         while i < card_quantity_in_deck:
             # Grab and store card name
-            name = deck_data.json().get('cards')[i].get('card').get('oracleCard').get('name')
+            name = deck_data.get('cards')[i].get('card').get('oracleCard').get('name')
             # Grab and store card quantity
-            quantity = deck_data.json().get('cards')[i].get('quantity')
+            quantity = deck_data.get('cards')[i].get('quantity')
 
-            # Insert data into dict with a
+            # Insert card data into dict
             card_pile[name] = quantity
             i += 1
         log.PrintAndLog(f"Successfully grabbed Archidekt deck data")
