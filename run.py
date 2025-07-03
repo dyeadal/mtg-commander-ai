@@ -1,4 +1,5 @@
-from lib import common
+from lib import common, ollamalib
 
-common.Menu()
+if ollamalib.CalculateMinReqs():
+    common.Menu()
 

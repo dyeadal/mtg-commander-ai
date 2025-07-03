@@ -1,2 +1,5 @@
 ollama          # to use local LLM
 requests        # send HTTP/S GET requests
+psutil          # to get system information
+gputil          # to get gpu information
+setuptools      # a dependncey for gputil, install using pip
