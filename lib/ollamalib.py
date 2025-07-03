@@ -3,14 +3,9 @@ import config as cfg
 import psutil
 import GPUtil
 
+
 model = cfg.Ollama_Model
 
-import ollama
-import config as cfg
-import psutil
-import GPUtil
-import platform
-import subprocess
 
 model = cfg.Ollama_Model
 
