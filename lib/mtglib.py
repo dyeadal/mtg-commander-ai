@@ -1,35 +1,22 @@
 # Functions for Archidekt data, and Scryfall API
+import requests
 
-Archidekt_List = "Sol Ring", "Command Tower"
+from lib.logging import PrintAndLog
 
 extended_card_list = []
 
-def PasteDeckInTerminal(archidekt_deck = None):
+def GrabArchidektData():
 
-    if archidekt_deck is None:
-        archidekt_deck = input("Copy and paste your Archidekt data into here. For more information insert \"HELP\" instead.\nEnter :")
+    # Store URL
+    url = input("Copy and paste your Archidekt deck URL here: ")
 
-        if archidekt_deck.upper() == "HELP":
-            print("""
+    str(url)
+    # Try to establish connection to HTTP page
+    try:
+        return requests.get(url)
+    except Exception as Error:
+        PrintAndLog(f"{Error}")
 
-            1) Navigate to your Archidekt deck online in a browser.
-            2) Click on "Extras"
-            3) Click "Export Deck"
-            4) Click on the blue "Copy" button
-            5) Paste contents in the terminal prompt below.
-        
-            """)
-
-            PasteDeckInTerminal()
-
-        else:
-            return archidekt_deck
-    else:
-        return archidekt_deck
-
-testvar = PasteDeckInTerminal()
-
-print(testvar)
 
 # Function to pull data about a single card name (string) #TODO
 
@@ -45,12 +32,15 @@ def PullCardFromScryfall(card_name):
 
 
 # Function to create card #TODO
-"""
-def PopulateListUsingScryfall(archidek_list):
+def PopulateListUsingScryfall(card_pile):
 
-    for card in archidekt_list:
+    for card in card_pile:
         extended_card_list.append(PullCardFromScryfall(card))
         log.Wait()
     return extended_card_list
-"""
 
+
+card_pile = {"Sol Ring": 1 , "Arcane Signet" : 1 , "Llanowar Elves": 1 , "Forest" : 5, "Command Tower" : 1}
+# Example of  future function call card_pile = GrabArchidektData("https://archidekt.com/decks/12028998/sultai_arisen_tarkir_dragonstorm_commander")
+
+PopulateListUsingScryfall(card_pile)
