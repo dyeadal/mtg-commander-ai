@@ -1,8 +1,9 @@
+
 # Functions for Archidekt data, and Scryfall API
 import custom_logging as log
 import config as cfg
 import requests
-
+from collections import defaultdict
 extended_card_list = []
 
 def GrabArchidektData(url = None):
@@ -58,42 +59,122 @@ def GrabArchidektData(url = None):
 
 # Function to pull data about a single card name (string) #TODO
 
+
+# ====== Pull Single Card Info from Scryfall ======
 def PullCardFromScryfall(card_name):
+    params = {"fuzzy": card_name}
+    log.PrintAndLog(f"Requesting Scryfall data for card: {card_name}")
 
-    card = ""
+    try:
+        cfg.Wait()
+        response = requests.get(cfg.SCRYFALL_API_URL, headers=cfg.http_header, params=params, timeout=10)
 
-    # if card contains power, toughness (likely a creature)
-    return # name, cast_cost, card_type, card_description, power, toughness
+        if response.status_code == 429:
+            log.PrintAndLog("Rate limit hit. Waiting and retrying...")
+            cfg.Wait()
+            response = requests.get(cfg.SCRYFALL_API_URL, headers=cfg.http_header, params=params, timeout=10)
 
-    # if card does not return power, toughness
-    return card # name, cast_cost, card_type, card_description
+        response.raise_for_status()
+        card = response.json()
+
+        card_type = card.get("type_line", "")
+        name = card.get("name", "")
+        mana_cost = card.get("mana_cost", "")
+        oracle_text = card.get("oracle_text", "").replace("\n", " ")
+        power = card.get("power")
+        toughness = card.get("toughness")
+        is_legendary = "Legendary" in card_type
+
+        card_data = {
+            "name": name,
+            "mana_cost": mana_cost,
+            "type": card_type,
+            "oracle_text": oracle_text,
+            "is_legendary": is_legendary
+        }
+
+        if power is not None and toughness is not None:
+            card_data["power"] = power
+            card_data["toughness"] = toughness
+
+        log.PrintAndLog(f"Card data assembled successfully for '{card_name}'")
+        return card_data
+
+    except Exception as e:
+        log.PrintAndLog(f"[ERROR] Failed to fetch or parse '{card_name}' from Scryfall: {e}")
+        return {"error": str(e), "name": card_name}
 
 
-# Function to create card #TODO
 def PopulateListUsingScryfall(card_pile):
-
-    for card in card_pile:
-        extended_card_list.append(PullCardFromScryfall(card))
-        log.Wait()
+    extended_card_list = []  # fresh list for this run
+    for card_name, quantity in card_pile.items():
+        try:
+            for _ in range(quantity):
+                extended_card_list.append(PullCardFromScryfall(card_name))
+            log.PrintAndLog(f"Added {quantity} entries for '{card_name}'")
+        except Exception as e:
+            log.PrintAndLog(f"[ERROR] While processing '{card_name}': {e}")
+            extended_card_list.append({"error": str(e), "name": card_name})
     return extended_card_list
 
-#PopulateListUsingScryfall(card_pile)
 
-####################################################
-# TEST TEST TEST TEST TEST TEST TEST TEST TEST
-####################################################
+def FormatCardListToString(card_list):
+    grouped_cards = defaultdict(lambda: {"count": 0, "data": None})
+    formatted_output = []
 
-# It is important to note return variable is a dictionary
-# Visit W3 link below to see examples
-# https://www.w3schools.com/python/python_dictionaries.asp
+    try:
+        for card in card_list:
+            try:
+                name = card.get("name", "Unknown")
+                grouped_cards[name]["count"] += 1
+                grouped_cards[name]["data"] = card
+            except Exception as e:
+                log.PrintAndLog(f"[ERROR] Grouping issue with card: {e}")
+        log.PrintAndLog("Successfully grouped cards")
+    except Exception as e:
+        log.PrintAndLog(f"[ERROR] Card grouping failed: {e}")
+        return "[ERROR] Could not format card list"
 
-# Example of GrabArchidekt() function and using its returned dictionaries
-test_card_pile = GrabArchidektData("https://archidekt.com/decks/13934805/sultai_arisen_tdm")
-print(test_card_pile)
+    for name, group in grouped_cards.items():
+        count = group["count"]
+        data = group["data"]
+        try:
+            if "error" in data:
+                formatted_output.append(f"[ERROR] {name} x{count} - {data['error']}")
+                continue
 
-print(len(test_card_pile))
+            line = f"{data.get('type', '')} | {name} x{count} | {data.get('mana_cost', '')}"
 
-# This will loop through each card which we will use in the Scrfall info retrival function
-# Ensure you implement delays and follow Scryfall API rules
-for card, quantity in test_card_pile.items():
-    print(card, quantity)
+            if "power" in data and "toughness" in data:
+                line += f" | {data['power']}/{data['toughness']}"
+
+            if "oracle_text" in data:
+                line += f" | {data['oracle_text']}"
+
+            if data.get("is_legendary"):
+                line += " | [Legendary]"
+
+            formatted_output.append(line)
+        except Exception as e:
+            log.PrintAndLog(f"[ERROR] Formatting issue for '{name}': {e}")
+            formatted_output.append(f"[ERROR] {name} x{count} - formatting failed")
+
+    log.PrintAndLog("Formatted card list successfully")
+    return "\n".join(formatted_output)
+
+
+if __name__ == "__main__":
+    try:
+        test_card_pile = GrabArchidektData("https://archidekt.com/decks/13934805/sultai_arisen_tdm")
+
+        print("\nInitial Card Pile:")
+        print(test_card_pile)
+        print(f"Total unique cards: {len(test_card_pile)}")
+
+        detailed_cards = PopulateListUsingScryfall(test_card_pile)
+        output_string = FormatCardListToString(detailed_cards)
+
+        print("\nFormatted Card Output:\n")
+        print(output_string)
+    except Exception as e:
+        log.PrintAndLog(f"[FATAL ERROR] Program terminated unexpectedly: {e}")
