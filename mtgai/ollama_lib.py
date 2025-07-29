@@ -1,8 +1,6 @@
 import ollama
 import config as cfg
 
-model = cfg.Ollama_Model
-
 # Calculate minimum requirement #TODO
 """
 def CalculateMinReqs(model):
@@ -15,7 +13,7 @@ def CalculateMinReqs(model):
 
 # Function to ask Ollama a question
 def askOllama(question):
-    response: ollama.ChatResponse = ollama.chat(model=cfg.model, messages=[{"role": "user", "content": question}])
+    response: ollama.ChatResponse = ollama.chat(model=cfg.Ollama_Model, messages=[{"role": "user", "content": question}])
     raw_answer = response.message.content
     # print(f"Ollama: {raw_answer}") # Debug, print direct response from ollama model
     return raw_answer
@@ -32,3 +30,4 @@ def formatAnswer(answer):
     return answer
 
 
+askOllama("Why is the sky blue?")
