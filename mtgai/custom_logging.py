@@ -8,6 +8,7 @@ LogLocation = cfg.LogLocation
 
 # Function to sleep
 def Wait(seconds = 3):
+    PrintAndLog(f"Waiting for {seconds} seconds.")
     time.sleep(seconds)
     return None
 

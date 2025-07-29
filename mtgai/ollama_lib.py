@@ -11,6 +11,28 @@ def CalculateMinReqs(model):
     return
 """
 
+# function to check if Ollama is running TODO
+
+def CheckOllamaRunning():
+
+    # is your fridge running?
+
+    return None # better go catch it
+
+# function to start Ollama service TODO
+def StartOllama():
+
+    # I know what's wrong with it, it got no gas in it!
+
+    return None
+
+# function to kill Ollama service TODO
+def TerminateOllama():
+
+    # the boy who lived, come to die
+
+    return None
+
 # Function to ask Ollama a question
 def askOllama(question):
     response: ollama.ChatResponse = ollama.chat(model=cfg.Ollama_Model, messages=[{"role": "user", "content": question}])
@@ -20,7 +42,7 @@ def askOllama(question):
 
 # Function to format answer, removing thinking text from thinking model
 def formatAnswer(answer):
-    # if think tags exist:
+    # think tags exist, remove thinking portions
     if "<think>" in answer and "</think>" in answer:
         # split answer using the </think> string
         before, after = answer.split("</think>", 1)
@@ -30,4 +52,5 @@ def formatAnswer(answer):
     return answer
 
 
-askOllama("Why is the sky blue?")
+#print(formatAnswer(askOllama("Why is the sky blue?")))
+print(ollama.show(cfg.Ollama_Model))

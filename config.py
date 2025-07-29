@@ -9,8 +9,12 @@ LogEnable = False
 # Takes None or string of directory path as a value
 LogLocation = None
 
+# Ollama HTTP API URL
+Ollama_API = "http://localhost:11434/api/generate"
+
 # LLM to use, you can find other models to use at https://ollama.com/
 Ollama_Model = "deepseek-r1"
+
 
 #################################################
 # System Variables

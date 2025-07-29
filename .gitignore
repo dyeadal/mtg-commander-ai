@@ -5,7 +5,7 @@ $HOME/*
 .DS_Store
 Thumbs.db
 
-# Ignore editor/IDE config
+# Ignore editor/IDE config files
 .vscode/
 .idea/
 *.swp
